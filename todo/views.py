@@ -5,16 +5,32 @@ from .forms import TareaForm
 
 def home(request):
     tareas=Tarea.objects.all()
-    context={'tareas':tareas}
-    return render(request,'todo/home.html',context)
+    return render(request,'todo/home.html',{'tareas':tareas})
 
 def agregar(request):
-    if request.method == "POST":
+    if request.method=="POST":
         form = TareaForm(request.POST)
         if form.is_valid():
             form.save()
             return redirect('home')
     else:
         form = TareaForm()
-    context = {'form': form}
-    return render(request, 'todo/agregar.html', context)
+    
+    return render(request, 'todo/agregar.html',{'form' : form})
+
+def eliminar(request,tarea_id):
+    tarea=Tarea.objects.get(id=tarea_id)
+    tarea.delete()
+    return redirect("home")
+
+def editar(request, tarea_id):
+    tarea=Tarea.objects.get(id=tarea_id)
+    if request.method=="POST":
+        form=TareaForm(request.POST, instance=tarea)
+        if form.is_valid():
+            form.save()
+            return redirect("home")
+    else:
+        form=TareaForm(instance=tarea)
+    
+    return render(request,"todo/editar.html",{"form":form})
